@@ -65,7 +65,7 @@ _Pay Attention_: This function could only be implemented when the plot is static
 In this funciton, we should using two different extra SVG canvas rather than trying to include all visualisations on a single canvas.</br>
 _Pay Attention_:The data of bar charts should changed from year to year.
 
-![p1](http://i66.tinypic.com/14kxzyc.jpg)
+![p1](http://i67.tinypic.com/wlccxz.jpg)
 
 ### 5. A checkbox in the right of the bubble chart for choosing specific countries to visualize the bubble chart more directly
 
@@ -79,7 +79,7 @@ Hint: When the chart is static, click the bubble, you can only see the selected 
 
 ## PostScript
 
-This is the main function I have achieved during the assignment. The details and raw data can be found on the source code which is posted in my [github](). If you have any questions please contact me. 
+This is the main function I have achieved during the assignment. The details and raw data can be found on the source code which is posted in my [github](). 
 
 
 —— By Mezier 19/01/2018
