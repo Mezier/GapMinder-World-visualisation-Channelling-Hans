@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<!DOCTYPE html>
+<!DOCTYPE html>
+<!DOCTYPE html>
+<!DOCTYPE html>
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang = "en" class="tas-com">
+<head>
+	<meta charset="utf-8">
+	<title>D3: Loading svg</title>
+	<style>
+    #year_header {
+  
+  font: "Helvetica Neue";
+  font-size:220px;
+  fill: #ddd;
+  z-index:-10;
+}
+
+div.label_content {
+  position: absolute;
+  text-align: center;
+  width: 150px;
+  height: 80px;
+  padding: 2px;
+  font: 12px sans-serif;
+  background: lightsteelblue;
+  border: 0px;
+  border-radius: 8px;
+  pointer-events: none;
+}
+.labelButton{
+   position: relative; top: 50px; 
+   font-size: 12px;
+	}
+.barchart2{
+	
+	width: 300px;
+	height:350px;
+    
+	
+	}
+.barchart3{
+	
+	width: 300px;
+	height:350px;
+	
+	position:relative;  top: 20px;
+	}
+.countrynames{
+	visibility:hidden;
+	}
+.grid line {
+  stroke: #ddd;
+  z-index: -10;
+}
+.selectChartBody{
+	width: 200px;
+	float: left;
+	position: relative; top: 50px;
+}
+.selectChart{
+	float: left;
+	width: 200px;
+	height: 420px;
+	overflow: auto;
+	position: relative; 
+}
+    </style>
+	<script type="text/javascript" src="./d3/d3.v4.js" charset="utf-8"></script>
+	<script type="text/javascript" src="./js/jquery-1.4.2.js"></script>
+</head>
+<body>
+
+	
+	<div style="width: 1400px; ">
+	<div class="mainBody" style="float:left">
+    
+       <h1 style="font-weight:bold">GapMinder World</h1>
+          <h3>Mapping the Wealth and Health of Nations</h3>
+          <script type="text/javascript">
+		    // Define margins			
+	        var margin = {top: 10, right: 20, bottom: 80, left: 30};
+			//the main canva width
+			var width1=720;
+			//the main canva width
+			var width2=250;
+			//the chart2 canva's height
+			var height1=550;
+			//the chart2 canva's height
+			var height2=320;
+			var svg_width=width1-margin.left-margin.right;
+			var svg_height=height1-margin.top-margin.bottom;
+			var svg2_width = width2 - margin.left - margin.right;
+			var svg2_height = height2 - margin.top - margin.bottom;			
+			display_year = 1900;
+			country="China";	
+			//the information in the bubble when mouseover		
+			var labelInfo = d3.select(".mainBody")
+			                  .append("div")
+                              .attr("class", "label_content")
+                              .style("opacity", 0);
+			//define a function to filter the displayed year
+			function yearFilter(value){
+				return (value.Year == display_year)
+			}
+			//define a function to filter the country, used in part 2
+			function countryFilter(value){
+				return (value.Country==country)
+				}
+			var dataset;
+			var svg = d3.select(".mainBody")
+						.append("svg")
+						//.style("background", "aliceblue")
+						.attr("width", svg_width + margin.left + margin.right)
+						.attr("height", svg_height + margin.top + margin.bottom)
+						.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");	
+			
+			// Add the year label; the value is set on transition.
+            var label = svg.append("text")
+                           .attr("id", "year_header")
+                           .attr("text-anchor", "end")
+                           .attr("y", 320)
+                           .attr("x", 600)
+                           .text(1900); 
+			// the canvas which plot the bubble
+		    var chartCanvas=svg.append("g")
+			                   ;
+			// the canvas which plot the trace
+            var traceCanvas=svg.append("g");
+            var xScale=d3.scaleLinear()
+			             .domain([0,500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000])
+						 .range([0,40, 120, 200, 280, 360, 440, 520, 600, 680]);	
+			var yScale=d3.scaleLinear()
+			             .domain([10,90])
+						 .range([svg_height,0], 0.1);
+			//	the radius related 					 
+			var radiusScale = d3.scaleSqrt()
+			                    .domain([0, 1000000000])
+								.range([0, 50]);
+			var colorScale = d3.scaleOrdinal(d3.schemeCategory10);
+		    // Create an x-axis connected to the x scale
+		    var xAxis = d3.axisBottom()
+			              .scale(xScale)
+				 		  //.ticks(15)
+				 		  .tickValues([0,500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000])
+				 		  
+				 		  .tickFormat(d3.format(",.0s"))
+						  ;	
+			//Define Y axis
+			var yAxis = d3.axisLeft()
+			              .scale(yScale); 
+			 
+			// call x-axis
+		    svg.append("g")
+					.attr("class", "axis")
+					.attr("id", "x-axis")
+					.attr("transform", "translate(0," + (svg_height) + ")")
+					.call(xAxis)
+					;
+					
+			// Call the y axis
+			svg.append("g")
+					.attr("class", "axis")
+					.attr("id", "y-axis")
+					.call(yAxis);  
+			 // add gridLine to the axis
+			 var gridlines = d3.axisBottom()
+                    .tickFormat("")
+                    .tickValues([500, 1000, 2000, 4000, 8000, 16000, 32000, 64000, 128000])
+                    .tickSize(-svg_height)					
+                    .scale(xScale)
+					;   
+			svg.append("g")
+                .attr("class", "grid")
+                .style("opacity",0.5)
+				.attr("transform", "translate(" + 0 + "," + (svg_height) + ")")
+                .call(gridlines);   
+			 			
+			 var gridlinesY = d3.axisLeft()
+                    .tickFormat("")
+                    .tickSize(-svg_width)					
+                    .scale(yScale)
+					;   
+			svg.append("g")
+                .attr("class", "grid")
+                .style("opacity",0.5)
+				//.attr("transform", "translate(" + 0 + "," + svg_width + ")")
+                .call(gridlinesY); 	
+			// add line end	
+
+			// Add an x-axis label.
+            svg.append("text")
+               .attr("class", "x label")
+               .attr("text-anchor", "end")
+               .attr("x", svg_width)
+               .attr("y", svg_height+30)
+               .text("income per capita, inflation-adjusted (dollars)");
+
+            // Add a y-axis label.
+            svg.append("text")
+               .attr("class", "y label")
+               .attr("text-anchor", "end")
+               .attr("y", 6)
+               .attr("dy", ".75em")
+               .attr("transform", "rotate(-90)")
+               .text("life expectancy (years)");   
+            
+			
+			//write function that easy to return value from dataset	
+			function x(d) { return d.GDP; }
+            function y(d) { return d.LifeExp; }
+            function radius(d) { return d.Population; }
+            function color(d) { return d.Region; }
+            function theNation(d) { return d.Country; }
+            //a funtion related to the position of bubble when the year is changing
+		    function position(dot) {
+            dot.attr("cx", function(d) { return xScale(x(d)); })
+               .attr("cy", function(d) { return yScale(y(d)); })
+               .attr("r", function(d) { return radiusScale(radius(d)); });
+                                      }  
+            //the same fuction as bubble changed fuction, which it's used to change the position of bubble lables.     
+            function textposition(texts) {
+            texts.attr("x", function(d) { return (xScale(x(d))+radiusScale(radius(d))+5); })
+                 .attr("y", function(d) { return (yScale(y(d))+radiusScale(radius(d))+5); });
+                                      }
+            //function to plot chart
+			function generateVis(){
+			  
+				var filtered_datset = dataset.filter(yearFilter);
+				
+			 	 /******** PERFORM DATA JOIN ************/   
+			  	 // Join new data with old elements, if any.				
+			    var dot=chartCanvas.selectAll("circle")
+				                   .attr("class", "circles")
+				                   .data(filtered_datset);
+				 //another canvas to mark the label around the bubble
+			    var texts=chartCanvas.selectAll("text")
+				                     .attr("class", "countrynames")
+				                     .data(filtered_datset,function(d){return theNation(d); })
+				                     ;
+				// Update the display of existing elelemnts to mathc new data
+	  	       // Perform a data join and add points to the chart  
+                   dot.transition()
+				      .duration(500)
+					  .ease(d3.easeBounce)
+					  .style("z-index","5")
+					  .style("stroke", "black") 
+					  .style("stroke-opacity",0.5)
+					  .style("fill-opacity",function(d){
+						  var choices = [];
+						  
+                          d3.selectAll(".myCheckbox").each(function(d,i){
+                          cb = d3.select(this);
+                          if(cb.property("checked")){
+
+                          choices.push(cb.property("id"));
+
+			                                        }		  
+                                 });
+		                  if(choices.includes(d.Country)||choices.length==0){
+		                             return "1";
+		                       }else{
+		                             return "0.3";
+                           			}
+               						  })
+					  .style("fill",function(d) { 	
+					  return colorScale(color(d));  					  
+					  })					 
+					  .call(position)					  
+					  ;
+		            texts.transition()
+				        .duration(500)
+						.ease(d3.easeBounce)
+						.call(textposition); 
+				// Create new elements in the dataset	  	        
+		           dot.enter()
+				      .append("circle")
+					  .attr("class", "circles")
+					  .style("fill-opacity",function(d){
+					  	
+						  var choices = [];
+                          d3.selectAll(".myCheckbox").each(function(d,i){
+                          cb = d3.select(this);
+                          if(cb.property("checked")){
+                          choices.push(cb.property("id"));			
+                                    }		  
+                                        });
+		                  if(choices.includes(d.Country)||choices.length==0){
+		                         return "1";
+		                        }else{
+			                     return "0.3";
+			                             }
+						  })
+				      .call(position)
+				      //define the function when mouseover, it will display more detailed information about this country
+					  .on("mouseover",function(d){
+						  //if(i==null){}
+						  labelInfo.style("opacity", 0.9);
+                          labelInfo.html("Country Name:"+d.Country
+                          	             +"<br/>"+"Region:"+d.Region
+						                 +"<br/>"+"LifeExp:"+d.LifeExp
+										 +"<br/>"+"population:"+ d.Population
+										 +"<br/>"+"GDP:"+ d.GDP)
+                                   .style("left", (d3.event.pageX) + "px")
+                                   .style("top", (d3.event.pageY - 28) + "px");
+						//  console.log(labelInfo);									
+						  })  
+					  // when mouse is leave, the label is gone
+					  .on("mouseout", function(d) {
+                          labelInfo
+                                   .style("opacity", 0);
+                                         }) 
+						//when click the label, it will appear the trace over these years
+					  .on("click",function(d){
+					  	    //the trace will only be displayed when the chart is static
+						     if(i==null){
+								 country=d.Country;
+								 //filter the country
+								var cdata=dataset.filter(countryFilter);
+								var trace=traceCanvas.selectAll("circle")	
+								                     .data(cdata)
+													 .enter()
+													 .append("circle")	
+													 .attr("id", "countrytrace")												 													 .each(function(d,i){
+														 d3.selectAll(".circles")
+														 .style("opacity", 0);
+														 d3.selectAll(".countrynames")
+														   .style("visibility", "hidden");
+														 d3.select(this)
+														   .datum([cdata[i]])												
+														   .attr("cx",xScale(x(d)))
+													       .attr("cy",yScale(y(d)))
+													       .attr("r",
+													         radiusScale(radius(d)))
+														   .style("fill",colorScale(color(d)))
+														   .style("stroke", "black") 
+														   .append("title")
+														   .text(d.Country+" "+d.Year+":"+x(d))
+														 });
+								// console.log(trace);
+								 }
+						  })
+					  .style("z-index","5")					 
+				      .style("fill", function(d) { return colorScale(color(d)); })
+					  .style("stroke", "black") 
+					  .transition()
+					  .duration(500)
+					  .ease(d3.easeBounce)
+					  ;
+		           texts.enter()
+				        .append("text")
+						.attr("class", "countrynames")						
+						.call(textposition)
+						.text(function(d){return theNation(d);})
+						.transition()
+						.duration(500)
+						.ease(d3.easeBounce);
+		 /**dot.append("title")
+		.text(function(d,i){return "Country Name:"+theNation(d)+"\n"+"GDP:"+x(d)+"\n"+"Life Expectancy"+y(d);});    **/
+		           //part 2
+				   var nest=d3.nest()
+					           .key(function(d){
+								   return d.Region;
+								   })
+								.rollup(function(d){
+									return d.length;
+									})
+								.entries(filtered_datset);
+								//console.log(display_year);
+						//console.log(nest);
+				   // Join new data with old elements, if any.
+			  	var bars2 = svg2.selectAll("rect")
+				   .data(nest, function(d) {
+											return d.key;
+										});
+			
+			 	/******** HANDLE UPDATE SELECTION ************/
+			  	// Update the display of existing elelemnts to mathc new data
+			  	bars2
+					.transition()
+					.duration(200)
+					
+					.attr("x", function(d) {
+				   		return x2Scale(d.key);
+				   })
+				   .attr("y", function(d) {
+				   		return y2Scale(d.value) ;
+				   })
+				   .attr("width", x2Scale.bandwidth())
+				   .attr("height", function(d) {
+				   		return svg2_height - y2Scale(d.value);
+				   })
+				   .style("fill", "Green");
+					   
+			
+				/******** HANDLE ENTER SELECTION ************/
+			  	// Create new elements in the dataset
+			  	bars2.enter()
+				   .append("rect")
+					.transition()
+					.duration(200)
+					
+				   .attr("x", function(d, i) {
+				   		return x2Scale(d.key);
+				   })
+				   .attr("y", function(d) {
+				   		return y2Scale(d.value) ;
+				   })
+				   .attr("width", x2Scale.bandwidth())
+				   .attr("height", function(d) {
+				   		return svg2_height - y2Scale(d.value);
+				   })
+				   .style("fill", "Blue");
+			
+				/******** HANDLE EXIT SELECTION ************/
+				// Remove bars that not longer have a matching data eleement
+				bars2.exit()
+					.transition()
+					.duration(200)
+					.ease(d3.easeBounce)
+					.style("fill", "red")
+				   	.attr("y", function(d) {
+				   		return svg2_height;
+				   })
+				   .attr("height", 0)
+					.remove();
+					//part 3
+				   var nest3=d3.nest()
+					           .key(function(d){
+								   return d.Government;
+								   })
+								.rollup(function(d){
+									return d.length;
+									})
+								.entries(filtered_datset);
+							//	console.log(display_year);
+						//console.log(nest);
+				   // Join new data with old elements, if any.
+			  	var bars3 = svg3.selectAll("rect")
+				           .data(nest3, function(d) {
+											return d.key;
+										});
+			
+			 	/******** HANDLE UPDATE SELECTION ************/
+			  	// Update the display of existing elelemnts to mathc new data
+			  	bars3
+					.transition()
+					.duration(200)
+					
+					.attr("x", function(d) {
+				   		return x3Scale(d.key);
+				   })
+				   .attr("y", function(d) {
+				   		return y3Scale(d.value) ;
+				   })
+				   .attr("width", x3Scale.bandwidth())
+				   .attr("height", function(d) {
+				   		return svg2_height - y3Scale(d.value);
+				   })
+				   .style("fill", "Green");
+					   
+			
+				/******** HANDLE ENTER SELECTION ************/
+			  	// Create new elements in the dataset
+			  	bars3.enter()
+				   .append("rect")
+					.transition()
+					.duration(200)
+					
+				   .attr("x", function(d, i) {
+				   		return x3Scale(d.key);
+				   })
+				   .attr("y", function(d) {
+				   		return y3Scale(d.value) ;
+				   })
+				   .attr("width", x3Scale.bandwidth())
+				   .attr("height", function(d) {
+				   		return svg2_height - y3Scale(d.value);
+				   })
+				   .style("fill", "Blue");
+			
+				/******** HANDLE EXIT SELECTION ************/
+				// Remove bars that not longer have a matching data eleement
+				bars3.exit()
+					.transition()
+					.duration(200)
+					.ease(d3.easeBounce)
+					.style("fill", "red")
+				   	.attr("y", function(d) {
+				   		return svg2_height;
+				   })
+				   .attr("height", 0)
+					.remove();
+				   dot.exit().remove();	
+				   texts.exit().remove();		
+				   
+				   d3.select("#rangeBar").property("value",display_year)
+				   d3.select("#year_header").text(display_year)	
+				   
+      
+       		
+			}
+		//timer	
+         var i;
+		 function run(){
+			    if(i){
+                clearInterval(i);
+				$("#startButton").val("start");
+                i=null;
+            }else{
+				
+                i = setInterval(function() {
+					    //country=null;
+						traceCanvas.selectAll("#countrytrace").remove();
+						d3.selectAll(".circles")
+					      .style("opacity", 1);
+						//d3.selectAll(".countrynames")
+				          //.style("opacity",1);
+						
+						if(display_year>=1900&&display_year<=1950){
+							display_year = display_year + 10;
+							}else{
+							display_year = display_year + 1;
+								}
+													
+							if(display_year > 2016){
+							display_year = 1900;
+						}
+														
+					  	generateVis();
+					}, 700);
+				$("#startButton").val("stop");
+            }
+			 }
+			
+           	
+			// Load the file data.csv and generate a visualisation based on it
+			d3.csv("./Gapminder_All_Time.csv", function(error, data){
+			
+				// handle any data loading errors
+				if(error){
+					console.log("Something went wrong");
+					console.log(error);
+				}else{
+					console.log("Data Loaded");				
+					data['Population']=+data['Population'];
+					data['LifeExp']=+data['LifeExp'];
+					data['GDP']=+data['GDP'];
+					// Assign  the data object loaded to the global dataset variable
+					dataset = data;		
+					// Update the domain of the x scale
+					x2Scale.domain(dataset.map(function(d) { return d.Region; }));
+					// Call the x-axis
+					svg2.select("#x-axis2").call(x2Axis)
+					    .selectAll("text")
+						 .attr("dx", "-4em")
+                         .attr("dy", ".5em")
+                         .attr("transform", "rotate(-65)");
+					// Call the x-axis
+					svg2.select("#y-axis2").call(y2Axis);
+					//chart 3
+					// Update the domain of the x scale
+					x3Scale.domain(dataset.map(function(d) { return d.Government; }));
+					// Call the x-axis
+					svg3.select("#x-axis3").call(x3Axis)
+					    .selectAll("text")
+						 .attr("dx", "-4em")
+                         .attr("dy", ".5em")
+                         .attr("transform", "rotate(-65)");
+					// Call the x-axis
+					svg3.select("#y-axis3").call(y3Axis);	
+					// extra function, there's a checkbox which display the country in the label
+					//when you choose one in the non static chart, it will display the checked country only
+				 	d3.select(".selectChart")
+				 	  .selectAll("input")
+                      .data(dataset)
+                      .enter()
+                      .append('label')
+                      .filter(function(d){ return d.Year==2008;})
+                      .attr('for',function(d,i){ return 'a'+i; })
+                      .html(function(d) { return "<br/>"+d.Country; })
+                      .append("input")
+                      //.attr("checked", true)
+                      .attr("type", "checkbox")
+	                  .attr("class","myCheckbox")
+                      .attr("id", function(d,i) { return d.Country; })
+                            	;
+ 
+					//	
+
+                   	generateVis();
+										
+					d3.select("#rangeBar")
+			          .on("click", function() { 
+				       display_year=parseInt(this.value);
+				       generateVis();          
+                         });					
+				}
+			});
+			// the button to country the display of country label
+			var t=0;
+            function labelShow(){
+				if(t%2==0){
+				   d3.selectAll(".countrynames")
+			         .style("visibility", "hidden");
+				t=t+1;
+				}else{
+				   d3.selectAll(".countrynames")
+			         .style("visibility", "visible");
+					 t=t+1;
+					}
+				}
+		 //start
+				function updates(){
+			
+		   /**	var choices = [];
+          d3.selectAll(".myCheckbox").each(function(d,i){
+          cb = d3.select(this);
+          if(cb.property("checked")){
+            choices.push(cb.property("id"));
+			
+          }
+		  
+        });
+		if(choices.length > 0){
+          dataset = dataset.filter(function(d,i){return !choices.includes(d.Country);});
+        }
+		chartCanvas.selectAll("circle")
+			.filter(function(d,i){ 
+			console.log(choices.includes(d.Country));
+			return !choices.includes(d.Country);})
+			.attr("visibility","hidden");
+			console.log(cb.id+"w"+choices);  
+			**/
+			}  
+			//end
+
+		</script>
+     <br/>
+     <input type="button" id="startButton" value="start" onclick="run()"/>     
+     <input type="range" name="points" min="1900" max="2016" step="1" value="0" id="rangeBar" style="width:650px">
+     
+    </div>
+    <div class="selectChartBody" style=" float: left;">
+    	<div class="selectChart"></div>
+    	<span class="labelButton">choose to display/undisplay the country label:</span>
+    	<input type="button" class="labelButton" value="Country label" onclick="labelShow()"/> 
+    	<br/>
+    	<p class="labelButton" style=" color: red">when the plot is static, you can click any bubble to display it's static trace</p>
+    	<p class="labelButton" style=" color: red">when the plot is dynamic, you can choose the checkbox to mark any specific country's dynamic trace by reduce other counties' opacity</p>
+    </div>
+    <!--
+    
+-->
+    </div>
+    
+    <div style="width: 300px; height: 700px; float: left; position: relative; left: 30px; ">
+    <div class="barchart2" >
+    <h3>The number of countries per region</h3>
+       <script>
+       var svg2 = d3.select(".barchart2")
+						.append("svg")
+						//.style("background", "aliceblue")
+						.attr("width", svg2_width + margin.left + margin.right)
+						.attr("height", svg2_height + margin.top + margin.bottom)
+						.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	   // part2
+			var y2Scale = d3.scaleLinear()
+				             .domain([0,80])        
+				                     .range([svg2_height, 0]);
+	
+			// Create a scale object to nicely take care of positioning bars along the horizontal axis
+			// We don't set the domain yet as data isn't loaded
+			var x2Scale = d3.scaleBand()
+							.range([0, svg2_width], 0.1)
+							.paddingInner(0.05)
+							.paddingOuter(0.05);
+						
+			//Define Y axis
+			var y2Axis = d3.axisLeft()
+							  .scale(y2Scale)
+							  .ticks(5);
+			
+			// Create an x-axis connected to the x scale
+			var x2Axis = d3.axisBottom()
+						 .scale(x2Scale);
+			// Call the y axis
+			svg2.append("g")
+				.attr("class", "axis2")
+				.attr("id", "y-axis2")
+				;
+					
+			// All but call the x-axis
+			svg2.append("g")
+				.attr("class", "axis2")
+				.attr("id", "x-axis2")
+				.attr("transform", "translate(0," + svg2_height + ")");
+			
+       </script>
+    </div>
+    
+    <div class="barchart3">
+    <h3>The number of countries with each government type</h3>
+    <script>
+       var svg3 = d3.select(".barchart3")
+						.append("svg")
+						//.style("background", "aliceblue")
+						.attr("width", svg2_width + margin.left + margin.right)
+						.attr("height", svg2_height + margin.top + margin.bottom)
+						.append("g")
+						.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+	   // part3
+			var y3Scale = d3.scaleLinear()
+				             .domain([0,150])        
+				                     .range([svg2_height, 0]);
+	
+			// Create a scale object to nicely take care of positioning bars along the horizontal axis
+			// We don't set the domain yet as data isn't loaded
+			var x3Scale = d3.scaleBand()
+							.range([0, svg2_width], 0.1)
+							.paddingInner(0.05)
+							.paddingOuter(0.05);
+						
+			//Define Y axis
+			var y3Axis = d3.axisLeft()
+							  .scale(y3Scale)
+							  .ticks(5);
+			
+			// Create an x-axis connected to the x scale
+			var x3Axis = d3.axisBottom()
+						 .scale(x3Scale);
+			// Call the y axis
+			svg3.append("g")
+				.attr("class", "axis3")
+				.attr("id", "y-axis3")
+				;
+					
+			// All but call the x-axis
+			svg3.append("g")
+				.attr("class", "axis3")
+				.attr("id", "x-axis3")
+				.attr("transform", "translate(0," + svg2_height + ")");
+			
+       </script>
+    </div>
+</div>
+</body>	 
+</html>

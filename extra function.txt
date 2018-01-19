@@ -1,0 +1,4 @@
+Extra Feature£º
+There¡¯s a checkbox in the right of the bubble chart, which is for choosing specific countries to visualize the bubble chart more directly. If you click the start button to see the changing bubble chart, it¡¯s too many and messy. When choosing the specific country (try to choose countries with big population to have a better insight about the chart), it can reduce the opacity of non-selected countries to mark the selected one.
+(When the chart is static, click the bubble, you can only see the selected bubble¡¯s trace while hidden other countries. If you want see all countries again, click the start button in the bottom to animate the bubble chart. )
+
