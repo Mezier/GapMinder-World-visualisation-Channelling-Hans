@@ -1,7 +1,7 @@
 # GapMinder-World-visualisation-Channelling-Hans
 ## Preface 
 
-Information Visualisation is one of important course of my postgraduate study. The reproduce of GapMinder World Visualisation is my final assignment of this course. D3, JavaScript, HTML is the main technology I used in this project. This blog is written for recording the effect of this project, the knowledge I learned in the leaning process, and the solution of some problems. The original [source code]() could be found on my [github]().
+Information Visualisation is one of important course of my postgraduate study. The reproduce of GapMinder World Visualisation is my final assignment of this course. D3, JavaScript, HTML is the main technology I used in this project. This blog is written for recording the effect of this project, the knowledge I learned in the leaning process, and the solution of some problems. The original source code could be found on my [github](https://github.com/Mezier/GapMinder-World-visualisation-Channelling-Hans).
 
 Hans Rosling is a data visualisation legend. His 2006 TED talk, the Best Stats you’ve Ever Seen, is one of the most viewed videos on the [TED website]  (http://bit.ly/2doLzAY). An updated interactive version of the GapMinder World 
 visualisation used in that demo is [available](www.gapminder.org/tools). 
@@ -79,7 +79,7 @@ Hint: When the chart is static, click the bubble, you can only see the selected 
 
 ## PostScript
 
-This is the main function I have achieved during the assignment. The details and raw data can be found on the source code which is posted in my [github](). 
+This is the main function I have achieved during the assignment. The details and raw data can be found on the source code which is posted in my [github](https://github.com/Mezier/GapMinder-World-visualisation-Channelling-Hans). 
 
 
 —— By Mezier 19/01/2018
